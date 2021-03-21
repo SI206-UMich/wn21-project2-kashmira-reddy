@@ -14,8 +14,22 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
+    f=open(filename,"r")
+    url=f.read()
+    soup = BeautifulSoup(url, 'html.parser')
+    tags = soup.find_all('a', class_='bookTitle')
+    collect_book_info = []
+    for tag in tags:
+        collect_book_info.append(tag.text.strip())
+    #print(collect_book_info)
+    tags = soup.find_all('a', class_='authorName')
+    collect_author_info = []
+    for tag in tags:
+        collect_author_info.append(tag.text.strip())
+    #print(collect_author_info)
+    search_results=list(zip(collect_book_info,collect_author_info))
+    print(search_results)
 
-    pass
 
 
 def get_search_links():
@@ -101,11 +115,11 @@ def extra_credit(filepath):
 class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
-
+    search_urls=get_search_links()
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
-
+        test=get_titles_from_search_results("search_results.htm")
         # check that the number of titles extracted is correct (20 titles)
 
         # check that the variable you saved after calling the function is a list
@@ -124,7 +138,7 @@ class TestCases(unittest.TestCase):
 
         # check that each URL in the TestCases.search_urls is a string
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
-
+        pass
 
     def test_get_book_summary(self):
         # create a local variable – summaries – a list containing the results from get_book_summary()
@@ -141,7 +155,7 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple, i.e. pages is an int
 
             # check that the first book in the search has 337 pages
-
+        pass
 
     def test_summarize_best_books(self):
         # call summarize_best_books and save it to a variable
@@ -155,7 +169,7 @@ class TestCases(unittest.TestCase):
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-
+        pass
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
@@ -172,7 +186,7 @@ class TestCases(unittest.TestCase):
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
-
+        pass
 
 
 if __name__ == '__main__':
