@@ -104,8 +104,32 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
-
+    source_dir = os.path.dirname(filepath)
+    full_path = os.path.join(source_dir, filepath)
+    f = open(full_path,'r', encoding='utf-8')
+    html=f.read()
+    f.close()
+    soup = BeautifulSoup(html, 'html.parser')
+    tags = soup.find_all('h4', class_='category__copy')
+    category = []
+    for tag in tags:
+        category.append(tag.text.strip())
+    #print(category)
+    title=[]
+    div1 = soup.find_all("div", class_="category__winnerImageContainer")
+    for item in div1:
+        div1_tag = item.find('img')['alt']
+        title.append(div1_tag)
+    #print(title)
+    url=[]
+    div2 = soup.find_all('div', class_='category clearFix')
+    for item in div2:
+        div2_tag = item.find('a')['href']
+        url.append(div2_tag)
+    #print(url)
+    best_books=list(zip(category, title, url))
+    #print(best_books)
+    return best_books
 
 def write_csv(data, filename):
     """
@@ -127,12 +151,12 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    f = open(filename,"w")
-    writer=csv.writer(f)
-    header="Book Title, Author Name"
-    writer.writerow([header.strip()])
-    for item in data:
-        writer.writerow([item[0],item[1]])
+    source_dir = os.path.dirname(filename)
+    full_path = os.path.join(source_dir, filename)
+    f = open(full_path,'w', encoding='utf-8')
+    writer=csv.writer(f, delimiter=",")
+    writer.writerow(['Book Title','Author Name'])
+    writer.writerows(data)
     f.close()
 
 
@@ -200,10 +224,10 @@ class TestCases(unittest.TestCase):
             self.assertEqual(type(tup[2]),int)
             # check that the first book in the search has 337 pages
             self.assertEqual(summaries[0][2],337)
-
+ 
     def test_summarize_best_books(self):
         # call summarize_best_books and save it to a variable
-        best_books=get_book_summary()
+        best_books=summarize_best_books("best_books_2020.htm")
         # check that we have the right number of best books (20)
         self.assertEqual(len(best_books),20)
             # assert each item in the list of best books is a tuple
@@ -214,8 +238,8 @@ class TestCases(unittest.TestCase):
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
         self.assertEqual(best_books[0],('Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'))
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-        self.assertEqual(best_books[0],('Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020')
-
+        self.assertEqual(best_books[-1],('Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'))
+    
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
         variable=get_titles_from_search_results("search_results.htm")
@@ -223,7 +247,10 @@ class TestCases(unittest.TestCase):
         write_csv(variable, "test.csv")
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
         f = open("test.csv","r")
-        csv_lines=f.readlines()
+        csv_reader = csv.reader(f)
+        csv_lines=[]
+        for i in csv_reader:
+            csv_lines.append(i)
         f.close()
         # check that there are 21 lines in the csv
         self.assertEqual(len(csv_lines),21)
